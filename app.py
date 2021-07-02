@@ -72,6 +72,23 @@ def clean_price(price_str):
 		return int(price_float * 100)
 
 
+def clean_id(id_str, id_options):
+	try:
+		book_id = int(id_str)
+		if book_id not in id_options:
+			raise ValueError
+	except ValueError:
+		input(f'''
+			\n****** ID ERROR ******
+			\rThe id should be a number from the following range.
+			\r{id_options}
+			\rPress enter to try again
+			\r********************''')
+		return
+	else:
+		return book_id
+
+
 def add_csv():
 	with open('suggested_books.csv') as csvfile:
 		data = csv.reader(csvfile)
@@ -118,7 +135,23 @@ def app():
 			input('\nPress enter to return to the main menu')
 		elif choice == '3':
 			# search book
-			pass
+			id_options = []
+			for book in session.query(Book):
+				id_options.append(book.id)
+			id_error = True
+			while id_error:
+				id_choice = input(f'''
+					\nId Options: {id_options}
+					\nBook Id:  ''')
+				id_choice = clean_id(id_choice, id_options)
+				if type(id_choice) == int:
+					id_error = False
+			the_book = session.query(Book).filter(Book.id == id_choice).first()
+			print(f'''
+				\n{the_book.title} by {the_book.author}
+				\rPublished: {the_book.published_date}
+				\rPrice: {the_book.price / 100} €''')
+			input('\nPress enter to return to the main menu')
 		elif choice == '4':
 			# book analysis
 			pass
